@@ -70,11 +70,12 @@ namespace ImageLabeler
             Rectangle rect = new Rectangle();
             rect.Fill = Brushes.Transparent;
             rect.Stroke = Brushes.DarkRed;
-            rect.Width = Mouse2X - Mouse1X;
-            rect.Height = Mouse2Y - Mouse1Y;
-            Canvas.SetLeft(rect, Mouse1X);
-            Canvas.SetTop(rect, Mouse1Y);
+            rect.Width = Math.Abs(Mouse2X - Mouse1X);
+            rect.Height = Math.Abs(Mouse2Y - Mouse1Y);
+            Canvas.SetLeft(rect, Math.Min(Mouse1X, Mouse2X));
+            Canvas.SetTop(rect, Math.Min(Mouse1Y, Mouse2Y));
             ImageCanvas.Children.Add(rect);
+            Mouse1X = 0; Mouse1Y = 0; Mouse2X = 0; Mouse2Y = 0;
         }
         Rectangle tmpRec;
         private void ImageCanvas_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
@@ -82,19 +83,27 @@ namespace ImageLabeler
             Point p = e.GetPosition(ImageCanvas);
             if (tmpRec == null)
             {
-                tmpRec = new Rectangle();
-                tmpRec.Fill = Brushes.Transparent;
-                tmpRec.Stroke = Brushes.DarkRed;
-                tmpRec.Width = p.X - Mouse1X;
-                tmpRec.Height = p.Y - Mouse1Y;
-                Canvas.SetLeft(tmpRec, Mouse1X);
-                Canvas.SetTop(tmpRec, Mouse1Y);
-                ImageCanvas.Children.Add(tmpRec);
+                if ( Mouse1X > 0 && Mouse1Y > 0)
+                {
+                    tmpRec = new Rectangle();
+                    tmpRec.Fill = Brushes.Transparent;
+                    tmpRec.Stroke = Brushes.DarkRed;
+                    tmpRec.Width = p.X - Mouse1X;
+                    tmpRec.Height = p.Y - Mouse1Y;
+                    Canvas.SetLeft(tmpRec, Math.Min(Mouse1X, Mouse2X));
+                    Canvas.SetTop(tmpRec, Math.Min(Mouse1Y, Mouse2Y));
+                    ImageCanvas.Children.Add(tmpRec);
+                }
+                
             }
             else
             {
-                ImageCanvas.Children.Remove(tmpRec);
-                tmpRec = null;
+                tmpRec.Width = Math.Abs(p.X - Mouse1X);
+                tmpRec.Height = Math.Abs(p.Y - Mouse1Y);
+                Canvas.SetLeft(tmpRec, Math.Min(Mouse1X,Mouse2X));
+                Canvas.SetTop(tmpRec, Math.Min(Mouse1Y, Mouse2Y));
+
+
             }
                 
             
