@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Forms;
 using System.IO;
-
+using ImageLabeler.Helpers;
 
 namespace ImageLabeler
 {
@@ -27,10 +27,12 @@ namespace ImageLabeler
         private string folderPath = "";
         private int Mouse1X, Mouse1Y;
         private int Mouse2X, Mouse2Y;
+        DrawHelper drawHelper;
         public MainWindow()
         {
             InitializeComponent();
             folderBrowserDialog = new FolderBrowserDialog();
+            drawHelper = new DrawHelper();
         }
         
         
@@ -49,11 +51,14 @@ namespace ImageLabeler
             ClearListBox();
             DirectoryInfo directory = new DirectoryInfo(path);
             FileInfo[] files = directory.GetFiles();
-            for (int i = 0; i < files.Length; i++)
+            var imageFiles = from file in files
+                             where file.Extension == ".jpeg" || file.Extension == ".jpg" || file.Extension == ".png"
+                             select file;
+            foreach (FileInfo file in imageFiles)
             {
-                
-                imageListBox.Items.Add(files[i].Name);
+                imageListBox.Items.Add(file.Name);
             }
+            
 
         }
         private void ClearListBox()
@@ -115,12 +120,16 @@ namespace ImageLabeler
             ImageBrush brush = new ImageBrush();
             Uri uri = new Uri((folderPath + "\\" + selectedImage), UriKind.Absolute);
             brush.ImageSource = new BitmapImage(uri);
+            drawHelper.ImageWidth = brush.ImageSource.Width;
+            drawHelper.ImageHeight = brush.ImageSource.Height;
             ImageCanvas.Background = brush;
         }
 
         private void ImageCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            drawHelper.MouseLeftDown = true;
             Point p =e.GetPosition(ImageCanvas);
+            drawHelper.MouseDownPoint = p;
             Mouse1X = (int)p.X;
             Mouse1Y = (int)p.Y;
         }
